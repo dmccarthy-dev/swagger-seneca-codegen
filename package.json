@@ -1,0 +1,51 @@
+{
+  "name": "swagger-seneca-codegen",
+  "version": "1.0.0",
+  "description": "A module that generates boilerplate seneca microservices based on a swagger specification.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/mocha --recursive tests/*tests.js",
+    "jshint": "node_modules/.bin/jshint index.js",
+    "coverage": "nyc node_modules/.bin/mocha tests/*tests.js",
+    "coverage_html": "nyc --reporter=html node_modules/.bin/mocha  tests/*tests.js",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmccarthy-dev/swagger-seneca-codegen.git"
+  },
+  "keywords": [
+    "swagger",
+    "seneca",
+    "microservices",
+    "codegen"
+  ],
+  "author": "Donal McCarthy (https://github.com/dmccarthy-dev)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dmccarthy-dev/swagger-seneca-codegen/issues"
+  },
+  "homepage": "https://github.com/dmccarthy-dev/swagger-seneca-codegen#readme",
+  "dependencies": {
+    "js-yaml": "^3.11.0",
+    "jsdoc": "^3.5.5",
+    "jsonic": "^0.3.0",
+    "mustache": "^2.3.0",
+    "swagger-tools": "^0.10.3"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "index.js"
+  ],
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "jshint": "^2.9.5",
+    "mocha": "^5.1.1",
+    "nyc": "^11.7.1",
+    "rewire": "^4.0.0",
+    "sinon": "^4.5.0",
+    "sinon-chai": "^3.0.0"
+  }
+}

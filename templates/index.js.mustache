@@ -1,0 +1,14 @@
+'use strict';
+
+const Seneca = require('seneca')({tag:'{{dirname}}'});
+
+{{#operations}}
+Seneca.add('{{pattern}}', (msg, reply) => {
+
+        reply( 'TODO: Implement Microservice', null );
+
+});
+
+
+{{/operations}}
+
