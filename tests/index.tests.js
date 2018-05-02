@@ -14,9 +14,9 @@ const should = chai.should();
 
 describe('Test swagger-seneca-codegen middleware', function() {
 
-    it( 'test index.js', function () {
+    it( 'test cli.js', function () {
 
-        require('../index');
+        require('../cli');
 
     } );
 });

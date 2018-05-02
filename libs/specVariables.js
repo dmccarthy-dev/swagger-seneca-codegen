@@ -1,115 +1,56 @@
 'use strict';
 
-const fs   = require('fs'),
-    path   = require('path'),
-    jsyaml = require('js-yaml'),
-    rewire = require('rewire'),
-    jsonic = require('jsonic'),
-    mustache = require('mustache'),
-    swaggerTools = require('swagger-tools');
-
-    const strw = rewire( './node_modules/swagger-tools/middleware/swagger-metadata.js' );
-
-
-const spec       = fs.readFileSync( path.join(__dirname, 'tests/petstore-simple.yaml' ), 'utf8' );
-const swaggerDoc = jsyaml.safeLoad( spec );
-
-const services = {};
-
-// Initialize the Swagger middleware
-swaggerTools.initializeMiddleware( swaggerDoc, function () {
-
-    const pSpec = strw.__get__( 'processSwaggerDocuments' )( swaggerDoc );
-
-    for ( const i in pSpec ){
-        for ( const j in pSpec[i].operations ){
-
-            const operation   = pSpec[i].operations[j].operation;
-            const pin         = identifyPin( operation );
-
-            if ( !services[pin] ){
-                services[pin]         = {};
-                services[pin].pin     = pin;
-                services[pin].name    = buildName( pin );
-                services[pin].dirname = buildDirName( pin );
-                services[pin].author  = swaggerDoc.info.contact.name;
-                services[pin].license = swaggerDoc.info.license.name;
-                services[pin].version = swaggerDoc.info.version;
-                services[pin].year    = ( new Date() ).getFullYear();
-                services[pin].description = swaggerDoc.info.description;
-                services[pin].operations  = [];
-            }
-
-            services[pin].operations.push( { path: i,
-                method      : j,
-                description : extractDescription( operation ),
-                pattern     : identifySenecaPattern( operation ),
-                params      : extractParamObjects( operation ),
-                responses   : extractResponseObjects( operation ),
-                //operation   : operation
-            } );
-
-        }
-    }
-
-
-    //create service
-    console.log( JSON.stringify( services['service:storage'], null, 4 ) );
-
-    for ( const s in services ){
-        createService( services[s] );
-    }
-
-});
-
+const jsonic = require('jsonic');
 
 /**
  *
- * @param service
+ * @param swaggerDoc
+ * @param operation
  */
-const createService = function ( service ) {
+const extractServiceDetails = function( swaggerDoc, operation ){
 
-    const templatesDir = './templates/';
-    const outputDir    = './outdir/';
+    const pin = identifyPin( operation );
 
-    if (!fs.existsSync( outputDir )){
-        fs.mkdirSync( outputDir );
-    }
-
-    if (!fs.existsSync( outputDir + '/' + service.dirname )){
-        fs.mkdirSync(  outputDir + '/' + service.dirname );
-    }
-
-    fs.readdir( templatesDir, function( err, filenames ) {
-
-        if (err) {
-            throw Error( err );
-        }
-
-        filenames.forEach(function( filename ) {
-            fs.readFile(templatesDir + filename, 'utf-8', function( err, content ) {
-                if (err) {
-                    throw Error( err );
-                }
-
-                const newFile = outputDir + '/' + service.dirname + '/' + filename.replace( /.mustache/, '' );
-
-                fs.writeFileSync( newFile, mustache.render( content, service ) );
-            });
-        });
-    });
-
-
-
-    //run through mustache templater
-    //write files
+    return {
+        pin     : pin,
+        name    : buildName( pin ),
+        dirname : buildDirName( pin ),
+        author  : swaggerDoc.info.contact.name,
+        license : swaggerDoc.info.license.name,
+        version : swaggerDoc.info.version,
+        year    : ( new Date() ).getFullYear(),
+        description : swaggerDoc.info.description
+    };
 
 };
 
 
 /**
  *
- * @param pin
+ * @param operation
+ * @param path
+ * @param method
+ */
+const extractOperationDetails = function( operation, path, method ){
+
+    return {
+        path        : path,
+        method      : method,
+        description : extractDescription( operation ),
+        pattern     : identifySenecaPattern( operation ),
+        params      : extractParamObjects( operation ),
+        responses   : extractResponseObjects( operation ),
+        //operation   : operation
+    };
+
+};
+
+
+
+
+
+
+/**
  * @returns {string}
  */
 const buildName = function ( pin ) {
@@ -308,12 +249,16 @@ const extractParamObjects = function ( operation ) {
 };
 
 
+/**
+ *
+ * @param operation
+ */
 const extractResponseObjects = function ( operation ) {
 
 };
 
 
-    /**
+/**
  *
  * @param operation
  * @returns {*}
@@ -341,3 +286,8 @@ const identifySenecaPattern = function ( operation ) {
 
     return pattern;
 };
+
+
+module.exports.identifyPin             = identifyPin;
+module.exports.extractServiceDetails   = extractServiceDetails;
+module.exports.extractOperationDetails = extractOperationDetails;
