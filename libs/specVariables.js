@@ -36,6 +36,7 @@ const extractOperationDetails = function( operation, path, method ){
     return {
         path        : path,
         method      : method,
+        functionName : buildName( identifyPin( operation ) ) + '.' + buildFunctionName( identifySenecaPattern( operation ) ),
         description : extractDescription( operation ),
         pattern     : identifySenecaPattern( operation ),
         params      : extractParamObjects( operation ),
@@ -59,6 +60,20 @@ const buildName = function ( pin ) {
 
     return parts[1].charAt(0).toUpperCase() + parts[1].substr(1)
         + parts[0].charAt(0).toUpperCase() + parts[0].substr(1);
+
+};
+
+
+/**
+ * converts pattern to function name.
+ * Grabs the final value from the seneca pattern.
+ *
+ * controller:petstore,operation:findPets
+ * @returns {string}
+ */
+const buildFunctionName = function ( pattern ) {
+
+    return pattern.substr( pattern.lastIndexOf(':') + 1 );
 
 };
 
@@ -170,6 +185,8 @@ const processObjectParams = function( p ){
         externalDocs : p.externalDocs,
         example      : p.example,
         type         : 'object',
+        ob           : '{',
+        cb           : '}'
     } );
 
 
@@ -187,7 +204,10 @@ const processObjectParams = function( p ){
             externalDocs : prop.externalDocs,
             example      : prop.example,
             pattern      : prop.pattern,
+            objProp      : true,
             type         : swaggerTypeToJSType( prop.type, prop.items ),
+            ob           : '{',
+            cb           : '}'
         } );
     }
 
@@ -211,7 +231,8 @@ const extractParamObjects = function ( operation ) {
 
         params.push( {
             name         : i,
-            description  : 'Seneca pattern',
+            description  : 'Seneca pattern parameter',
+            senPatParam  : true,
             required     : true,
             readonly     : false,
             writeOnly    : false,
@@ -219,6 +240,8 @@ const extractParamObjects = function ( operation ) {
             externalDocs : null,
             example      : patternObj[i],
             type         : typeof( patternObj[i] ),
+            ob           : '{',
+            cb           : '}'
         } )
     }
 
@@ -240,6 +263,8 @@ const extractParamObjects = function ( operation ) {
                 externalDocs : p.externalDocs,
                 example      : p.example,
                 type         : swaggerTypeToJSType( p.type, p.items ),
+                ob           : '{',
+                cb           : '}'
             } )
         }
 

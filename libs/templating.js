@@ -43,15 +43,16 @@ const dumpTemplates = function ( templateDir, targetDir ) {
  * @param {object} service
  * @param {string} templateDir
  * @param {string} targetDir
- * @param {override} override - flags if
+ * @param {boolean} override
+ * @param {boolean} standalone
  */
-const createService = function ( service, templateDir, targetDir, override ) {
+const createService = function ( service, templateDir, targetDir, override, standalone ) {
 
     if (!fs.existsSync( targetDir )){
         fs.mkdirSync( targetDir );
     }
 
-    if (!fs.existsSync( path.join( targetDir, service.dirname ) ) ){
+    if (standalone && !fs.existsSync( path.join( targetDir, service.dirname ) ) ){
         fs.mkdirSync(  path.join( targetDir, service.dirname ) );
     }
 
@@ -67,8 +68,7 @@ const createService = function ( service, templateDir, targetDir, override ) {
                     throw Error( err );
                 }
 
-                const targetFile = path.join( targetDir, service.dirname, filename.replace( /.mustache/, '' ) );
-
+                const targetFile = identifyTargetFile( targetDir, service, filename, standalone );
                 if ( !fs.existsSync( targetFile ) || override ){
                     fs.writeFileSync( targetFile, mustache.render( content, service ) );
                 }
@@ -76,6 +76,29 @@ const createService = function ( service, templateDir, targetDir, override ) {
         });
     });
 
+};
+
+
+/**
+ *
+ * @param targetDir
+ * @param service
+ * @param filename
+ * @param standalone
+ *
+ * @returns {*}
+ */
+const identifyTargetFile = function ( targetDir, service, filename, standalone ){
+
+    if ( standalone ){
+        return path.join( targetDir, service.dirname, filename.replace( /.mustache/, '' ) );
+    }
+
+    if ( filename === 'index.js.mustache' ){
+        return path.join( targetDir, service.name + '.js' );
+    }
+
+    return path.join( targetDir, filename.replace( /.mustache/, '' ) );
 };
 
 

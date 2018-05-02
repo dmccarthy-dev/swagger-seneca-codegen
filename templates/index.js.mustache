@@ -2,10 +2,33 @@
 
 const Seneca = require('seneca')({tag:'{{dirname}}'});
 
+/**
+ * @namespace {{name}}
+ * @description {{description}}
+ * @licence {{license}}
+ * @author {{author}}
+ */
+
+
 {{#operations}}
+/**
+ * @function {{functionName}}
+ *
+ * @description {{description}}
+ *
+ * @param {Object} msg - Seneca message object
+{{#params}}
+{{^readonly}} * @param {{ob}}{{type}}{{cb}}  {{^required}}[{{/required}}msg.{{name}}{{#senPatParam}}={{example}}{{/senPatParam}}{{^required}}]{{/required}} - {{description}}{{externalDocs}}{{/readonly}}
+{{/params}}
+ * @param {Object} reply - reply callback
+ */
 Seneca.add('{{pattern}}', (msg, reply) => {
 
-        reply( 'TODO: Implement Microservice', null );
+{{#params}}{{^senPatParam}}
+    {{^readonly}}{{^objProp}}const {{name}} = msg.{{name}}; {{/objProp}}{{/readonly}}
+{{/senPatParam}}{{/params}}
+
+    reply( null, {} );
 
 });
 

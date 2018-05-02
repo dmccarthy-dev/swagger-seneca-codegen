@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 'use strict';
 
 const fs   = require('fs'),
@@ -144,11 +146,12 @@ const generate = function (  args, options   ) {
     const targetDir   = normaliseFileParam( options, 'target', false );
     const templateDir = normaliseFileParam( options, 'template', false );
     const override    = options.override;
+    const standalone  = options.standalone;
 
     processSwaggerFile( swaggerFile ).then(value => {
 
         for ( const i in value ){
-            templating.createService( value[i], templateDir, targetDir, override );
+            templating.createService( value[i], templateDir, targetDir, override, standalone );
         }
 
         console.log( 'Modules/projects generated in: ' + targetDir );
@@ -184,6 +187,11 @@ prog
     .option( '--override <directory>',
         'Directory containing custom template files',
         prog.BOOLEAN,
+        true)
+    .option( '--standalone <boolean>',
+        'Output each pin as a standalone service.',
+        prog.BOOLEAN,
+        true,
         true)
     .help('The generate command consumes a swagger spec and creates one or more Seneca modules/projects based on the Swagger operations.') // here our custom help for the `order` command
     .action(generate)
