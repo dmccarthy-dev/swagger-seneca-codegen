@@ -4,7 +4,13 @@ const Seneca = require('seneca')({tag:'{{dirname}}'});
 
 /**
  * @namespace {{name}}
- * @description {{description}}
+ *
+ *
+ * @description Handles the following REST API calls:
+{{#operations}}
+ * @see {{method}} - {{{path}}} {@link {{functionName}} }
+{{/operations}}
+ *
  * @licence {{license}}
  * @author {{author}}
  */

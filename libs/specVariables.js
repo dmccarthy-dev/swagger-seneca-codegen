@@ -15,11 +15,13 @@ const extractServiceDetails = function( swaggerDoc, operation ){
         pin     : pin,
         name    : buildName( pin ),
         dirname : buildDirName( pin ),
-        author  : swaggerDoc.info.contact.name,
-        license : swaggerDoc.info.license.name,
-        version : swaggerDoc.info.version,
+        author  : ( swaggerDoc.info && swaggerDoc.info.contact ) ? swaggerDoc.info.contact.name : '',
+        license : ( swaggerDoc.info && swaggerDoc.info.license ) ? swaggerDoc.info.license.name : '',
+        version : ( swaggerDoc.info && swaggerDoc.info.version ) ? swaggerDoc.info.version : '',
         year    : ( new Date() ).getFullYear(),
-        description : swaggerDoc.info.description
+        description : ( swaggerDoc.info && swaggerDoc.info.description ) ? swaggerDoc.info.description : '',
+        jsonDescription  : (''+swaggerDoc.info.description).replace( /\n/g, '\\n' ),
+        jsDocDescription : (''+swaggerDoc.info.description).replace( /\n/g, '\n * ' )
     };
 
 };
@@ -173,6 +175,7 @@ const swaggerTypeToJSType = function ( type, items ) {
  */
 const processObjectParams = function( p ){
 
+
     const objParams = [];
 
     objParams.push( {
@@ -197,7 +200,7 @@ const processObjectParams = function( p ){
         objParams.push( {
             name         : p.name + '.' + propName,
             description  : extractDescription( prop ),
-            required     : p.schema.required[ propName ],
+            required     : ( p.schema.required && p.schema.required[ propName ] ),
             readonly     : prop.readonly,
             writeOnly    : prop.writeOnly,
             nullable     : prop.nullable,
@@ -245,29 +248,33 @@ const extractParamObjects = function ( operation ) {
         } )
     }
 
-    for ( const p of operation.parameters ){
+    //parameters are optional.
+    if ( operation.parameters ){
 
-        if ( p.schema && p.schema.type === 'object'){
+        for ( const p of operation.parameters ){
 
-            params = params.concat( processObjectParams( p ) );
+            if ( p.schema && p.schema.type === 'object'){
+
+                params = params.concat( processObjectParams( p ) );
+
+            }
+            else{
+                params.push( {
+                    name         : p.name,
+                    description  : extractDescription( p ),
+                    required     : p.required,
+                    readonly     : p.readonly,
+                    writeOnly    : p.writeOnly,
+                    nullable     : p.nullable,
+                    externalDocs : p.externalDocs,
+                    example      : p.example,
+                    type         : swaggerTypeToJSType( p.type, p.items ),
+                    ob           : '{',
+                    cb           : '}'
+                } )
+            }
 
         }
-        else{
-            params.push( {
-                name         : p.name,
-                description  : extractDescription( p ),
-                required     : p.required,
-                readonly     : p.readonly,
-                writeOnly    : p.writeOnly,
-                nullable     : p.nullable,
-                externalDocs : p.externalDocs,
-                example      : p.example,
-                type         : swaggerTypeToJSType( p.type, p.items ),
-                ob           : '{',
-                cb           : '}'
-            } )
-        }
-
     }
 
     return params;
