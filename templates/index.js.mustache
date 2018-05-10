@@ -18,7 +18,7 @@ const Seneca = require('seneca')({tag:'{{dirname}}'});
 
 {{#operations}}
 /**
- * @function {{functionName}}
+ * @callback {{functionName}}
  *
  * @description {{description}}
  *
@@ -26,7 +26,10 @@ const Seneca = require('seneca')({tag:'{{dirname}}'});
 {{#params}}
 {{^readonly}} * @param {{ob}}{{type}}{{cb}}  {{^required}}[{{/required}}msg.{{name}}{{#senPatParam}}={{example}}{{/senPatParam}}{{^required}}]{{/required}} - {{description}}{{externalDocs}}{{/readonly}}
 {{/params}}
- * @param {Object} reply - reply callback
+ *
+ * @param {callback} reply - Seneca reply callback
+ * @param {*} reply.error - error callback
+ * @param {object} reply.result - result object
  */
 Seneca.add('{{pattern}}', (msg, reply) => {
 

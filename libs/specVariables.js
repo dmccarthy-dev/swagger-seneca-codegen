@@ -287,6 +287,57 @@ const extractParamObjects = function ( operation ) {
  */
 const extractResponseObjects = function ( operation ) {
 
+    //console.log( JSON.stringify( operation, null, 4 ) );
+
+    const responses = [];
+
+    if ( operation.responses ){
+        for ( const name in operation.responses ){
+            const response = operation.responses[name];
+            const r = {};
+
+            r.name = name;
+
+            if ( response.schema ){
+                r.type = response.schema.type;
+                r.properties = [];
+
+                if (r.type === 'array'){
+                    if ( response.schema.items.type === 'object' ){
+                        if ( response.schema.items.allOf ) {
+                            for ( const ao of response.schema.items.allOf ){
+                                if ( ao.properties ){
+                                    for ( const p in ao.properties ){
+                                        r.properties.push( {
+                                            name : p,
+                                            type : swaggerTypeToJSType( ao.properties[p].type ),
+                                            example : ao.properties[p].example,
+                                            pattern : ao.properties[p].pattern
+                                        } );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (r.type === 'object'){
+                    for ( const p in response.schema.properties ){
+                        r.properties.push( {
+                            name : p,
+                            type : swaggerTypeToJSType( response.schema.properties[p].type ),
+                            example : response.schema.properties[p].example,
+                            pattern : response.schema.properties[p].pattern
+                        } );
+                    }
+                }
+            }
+            responses.push( r );
+        }
+    }
+
+    //process.exit(0);
+
+    return responses;
 };
 
 
